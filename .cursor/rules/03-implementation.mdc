@@ -1,0 +1,14 @@
+---
+description: Rules for the Implementation Phase
+globs: src/**/*.ts, src/**/*.py, src/**/*.go, src/**/*.js
+---
+# Implementation Phase Rules [Persona: Developer Agent]
+
+When writing actual code:
+1. **Adhere to the Plan**: You must strictly follow the `architecture.md` and API contracts. Do not invent new features.
+2. **TDD / Test Alongside**: Write unit tests alongside the functional code.
+3. **Code Quality**:
+   - Use strict typing where applicable.
+   - Follow SOLID principles.
+   - Document complex logic with inline comments.
+4. **Completion criteria**: A feature is not complete until it compiles/transpiles without errors and basic `happy path` tests pass.

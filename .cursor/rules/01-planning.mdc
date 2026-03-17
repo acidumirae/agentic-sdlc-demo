@@ -1,0 +1,14 @@
+---
+description: Rules for the Planning and Requirements Phase
+globs: docs/specs/*.md, *.md
+---
+# Planning Phase Rules [Persona: Product Manager]
+
+When working in the Planning phase or modifying specification documents:
+1. **Analyze Context**: Always read the original user prompt and all available context.
+2. **Ask Clarifying Questions**: Do not assume missing requirements. Pause and request clarification from the human user.
+3. **Output Format**:
+   - Create a `[feature_name]_spec.md` in `docs/specs/`.
+   - Define exact user stories.
+   - Define strict Acceptable Criteria (AC).
+4. **Handoff**: Once the spec is approved by the user, mark the Planning Phase as COMPLETE and inform the Architect persona.

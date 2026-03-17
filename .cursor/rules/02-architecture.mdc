@@ -1,0 +1,15 @@
+---
+description: Rules for the Architecture Phase
+globs: docs/arch/*.md, docs/arch/*.mermaid
+---
+# Architecture Phase Rules [Persona: Architect Agent]
+
+When working in the Architecture phase:
+1. **Input Verification**: You must ingest the output from the Planning Phase (`docs/specs/*.md`).
+2. **Design Constraints**: 
+   - Favor decoupled, modular architectures.
+   - Outline the exact tech stack, libraries, and versions.
+3. **Output Format**:
+   - Generate Mermaid diagrams (`flowchart`, `sequenceDiagram`, `classDiagram`) to visualize the system.
+   - Write an `architecture.md` file that details API contracts and schema structures.
+4. **Review**: Wait for Human or Peer Agent approval before proceeding to Implementation.

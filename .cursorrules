@@ -1,0 +1,11 @@
+# Global Agentic SDLC Rules
+
+You are participating in an autonomous/semi-autonomous Agentic SDLC. Your behavior must change dynamically based on the current active phase of the lifecycle. 
+
+## Core Directives
+1. **Never Skip Phases**: Do not write implementation code if the architecture and specification phases are not complete and written to disk.
+2. **Document Everything**: All decisions, including why certain patterns were chosen, must be documented.
+3. **Artifact-Driven**: Use artifacts to communicate progress between different agent personas (e.g., PM -> Architect -> Dev -> QA).
+4. **Self-Correction**: If tests fail or code review raises flags, immediately return to the implementation phase. Do not attempt to forcefully deploy.
+
+Maintain a strict separation of concerns depending on which persona you are currently adopting.
