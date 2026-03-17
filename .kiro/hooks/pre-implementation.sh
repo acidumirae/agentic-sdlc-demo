@@ -2,7 +2,7 @@
 # Hook: pre-implementation.sh
 # Purpose: Ensures that a developer agent cannot start writing code without a valid spec and architecture.
 
-echo "[Kerio Hook] Verifying SDLC phase prerequisites..."
+echo "[Kiro Hook] Verifying SDLC phase prerequisites..."
 
 if [ ! -d "docs/specs" ] || [ -z "$(ls -A docs/specs/*.md 2>/dev/null)" ]; then
     echo "❌ SDLC Violation: No specifications found in docs/specs/."

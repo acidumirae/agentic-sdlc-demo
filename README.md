@@ -1,6 +1,6 @@
 # Agentic SDLC Framework
 
-This repository serves as a blueprint for a fully Agentic Software Development Life Cycle (SDLC). It contains specifications, rules, AI skills, and hooks designed for agentic editors and frameworks like Cursor (`.cursor`) and Kerio (`.kerio`).
+This repository serves as a blueprint for a fully Agentic Software Development Life Cycle (SDLC). It contains specifications, rules, AI skills, and hooks designed for agentic editors and frameworks like Cursor (`.cursor`) and Kiro (`.kiro`).
 
 ## Phases of the Agentic SDLC
 
@@ -14,6 +14,6 @@ This repository serves as a blueprint for a fully Agentic Software Development L
 
 - `.cursor/rules/`: Context-aware rules for Cursor IDE to enforce SDLC phases.
 - `.cursorrules`: Global prompt rules for the agent.
-- `.kerio/specifications/`: Formal definitions of the agentic workflow.
-- `.kerio/skills/`: Prompt instructions giving the agent specialized capabilities (Architect, QA, etc.).
-- `.kerio/hooks/`: Scripts that enforce phase barriers (e.g., stopping implementation if no spec exists).
+- `.kiro/specifications/`: Formal definitions of the agentic workflow.
+- `.kiro/skills/`: Prompt instructions giving the agent specialized capabilities (Architect, QA, etc.).
+- `.kiro/hooks/`: Scripts that enforce phase barriers (e.g., stopping implementation if no spec exists).

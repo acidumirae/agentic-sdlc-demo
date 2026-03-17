@@ -2,17 +2,17 @@
 # Hook: pre-commit
 # Purpose: Intercepts git commits to ensure the QA/Review agent has signed off.
 
-echo "[Kerio Hook] Triggering pre-commit QA review..."
+echo "[Kiro Hook] Triggering pre-commit QA review..."
 
 # In a real environment, this might call the agent CLI
-# e.g., kerio execute qa-analyst --target staged
+# e.g., kiro execute qa-analyst --target staged
 
-if ! command -v kerio &> /dev/null; then
-    echo "⚠️  'kerio' CLI not found. Skipping strict agentic review, but this violates SDLC policies."
+if ! command -v kiro &> /dev/null; then
+    echo "⚠️  'kiro' CLI not found. Skipping strict agentic review, but this violates SDLC policies."
     exit 0
 fi
 
-kerio run qa-analyst --staged
+kiro run qa-analyst --staged
 RESULT=$?
 
 if [ $RESULT -ne 0 ]; then

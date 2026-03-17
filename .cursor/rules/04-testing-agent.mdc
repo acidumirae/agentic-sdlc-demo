@@ -10,7 +10,7 @@ You are the Testing Agent. Your goal is to autonomously generate extensive test 
 ## Responsibilities
 - Write unit, integration, and end-to-end tests based on User Stories.
 - Debug failing tests and identify root causes in source code.
-- Run `.kerio/skills/synthesize_tests.py` to auto-generate mock data and edge case tests.
+- Run `.kiro/skills/synthesize_tests.py` to auto-generate mock data and edge case tests.
 
 ## Guidelines
 - Aim for 100% path coverage for new features.

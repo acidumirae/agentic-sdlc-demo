@@ -3,7 +3,7 @@
 This document outlines the architecture and execution flow for the multi-agent Software Development Life Cycle (SDLC) prototype. 
 
 ## Overview
-We have created a federated multi-agent system combining `.cursor/rules` (guiding IDE-level agent interactions) and `.kerio/` framework configurations (orchestrating Git-native hooks, workflow specs, and specialized skills).
+We have created a federated multi-agent system combining `.cursor/rules` (guiding IDE-level agent interactions) and `.kiro/` framework configurations (orchestrating Git-native hooks, workflow specs, and specialized skills).
 
 ## System Architecture
 
@@ -18,11 +18,11 @@ We established 7 distinct agents to operate within the Cursor IDE context:
 - **05-security-agent.mdc**: Performs Continuous Static Analysis (SAST), finding and fixing OWASP vulnerabilities inline.
 - **06-deployment-agent.mdc**: Reads telemetry data and manages IaC for predictive, zero-downtime canary deployments.
 
-### 2. SDLC Specifications (`.kerio/specifications/`)
+### 2. SDLC Specifications (`.kiro/specifications/`)
 - `sdlc-workflow.yaml`: Defines the chronological execution graph. Every phase (e.g., `requirements-and-planning` -> `design-and-prototyping` -> `development-and-refactoring`) is linked, ensuring dependencies are met before an agent pool is activated.
 - `roles.yaml`: Enumerates agent capabilities (e.g., `sast_scanning`, `ast_refactoring`), the required underlying LLM models, and strict access controls (e.g., limiting the Testing Agent to `write_tests` and bug fixes).
 
-### 3. Workflow Integration (`.kerio/hooks/` and `.kerio/skills/`)
+### 3. Workflow Integration (`.kiro/hooks/` and `.kiro/skills/`)
 The system bridges the gap between text-based AI and physical computing via executable scripts:
 
 - **Git Hooks**:
@@ -35,6 +35,6 @@ The system bridges the gap between text-based AI and physical computing via exec
   - `deployment_predictor.py`: Evaluates mock CI/CD telemetry to output a risk score, halting unsafe deployments automatically.
 
 ## Validation Results
-- The directory tree structure for `.kerio` and `.cursor/rules` has been successfully implemented and cross-linked.
+- The directory tree structure for `.kiro` and `.cursor/rules` has been successfully implemented and cross-linked.
 - Executable flags have been set for all `.sh` hooks and `.py` skill scripts.
 - The workflow maps continuously from prompt -> requirements -> design -> code -> test -> secure -> deploy.

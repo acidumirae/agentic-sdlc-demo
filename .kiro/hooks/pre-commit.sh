@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-# .kerio/hooks/pre-commit.sh
+# .kiro/hooks/pre-commit.sh
 # Trigger the Security Reviewer Agent before allowing local commits.
 
-echo "Kerio SDLC: Triggering pre-commit security analysis..."
+echo "Kiro SDLC: Triggering pre-commit security analysis..."
 
 # Simulate the agent call
-python3 .kerio/skills/static_scanner.py --diff HEAD
+python3 .kiro/skills/static_scanner.py --diff HEAD
 
 if [ $? -ne 0 ]; then
     echo "[!] Security vulnerabilities found. The Security Agent has blocked this commit."
