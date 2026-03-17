@@ -1,0 +1,60 @@
+agents:
+  orchestration-agent:
+    model: "claude-3.5-sonnet"
+    capabilities: 
+      - "workflow_management"
+      - "artifact_validation"
+    access: 
+      - "read_all"
+      - "write_pr"
+
+  planning-agent:
+    model: "gpt-4"
+    capabilities:
+      - "ticket_generation"
+      - "requirement_parsing"
+    access:
+      - "write_docs"
+
+  design-agent:
+    model: "claude-3-opus"
+    capabilities:
+      - "figma_api_write"
+      - "css_generation"
+    access:
+      - "write_ui_src"
+
+  development-agent:
+    model: "claude-3.5-sonnet"
+    capabilities:
+      - "polyglot_coding"
+      - "ast_refactoring"
+    access:
+      - "write_src"
+
+  testing-agent:
+    model: "gpt-4"
+    capabilities:
+      - "mock_generation"
+      - "stack_trace_analysis"
+    access:
+      - "write_tests"
+      - "write_src" # Allowed to fix bugs
+
+  security-agent:
+    model: "claude-3.5-sonnet"
+    capabilities:
+      - "sast_scanning"
+      - "secret_detection"
+    access:
+      - "read_all"
+      - "block_ci"
+
+  deployment-agent:
+    model: "gpt-4"
+    capabilities:
+      - "infrastructure_as_code"
+      - "telemetry_parsing"
+    access:
+      - "write_infra"
+      - "execute_deploy"
