@@ -1,60 +1,182 @@
+version: "2.0"
+description: >
+  Agent role definitions for the Agentic SDLC. Defines capabilities,
+  model assignments, access controls, and inter-agent communication rules.
+
 agents:
   orchestration-agent:
+    description: "Master coordinator. Manages phase gates, validates artifacts, routes between agents."
     model: "claude-3.5-sonnet"
-    capabilities: 
-      - "workflow_management"
-      - "artifact_validation"
-    access: 
-      - "read_all"
-      - "write_pr"
+    capabilities:
+      - workflow_management
+      - artifact_validation
+      - phase_gate_enforcement
+      - agent_delegation
+      - escalation_management
+    access:
+      - read_all
+      - write_pr
+      - block_pipeline
+      - trigger_agents
+    communication:
+      format: structured_handoff
+      authority: override
+    cursor_rule: "00-orchestration.mdc"
+    kiro_skill: null
 
   planning-agent:
-    model: "gpt-4"
+    description: "Extracts requirements, generates user stories and BDD acceptance criteria from business goals."
+    model: "claude-3.5-sonnet"
     capabilities:
-      - "ticket_generation"
-      - "requirement_parsing"
+      - requirement_parsing
+      - user_story_generation
+      - bdd_criteria_writing
+      - stakeholder_clarification
+      - ticket_generation
     access:
-      - "write_docs"
+      - read_prompts
+      - write_docs
+    output_paths:
+      - docs/planning/
+    cursor_rule: "01-planning-agent.mdc"
+    kiro_skill: "extract_requirements.py"
+    kiro_steering: "planning-agent.md"
+
+  architect-agent:
+    description: "Designs system architecture, API contracts, data models, and Mermaid diagrams."
+    model: "claude-3.5-sonnet"
+    capabilities:
+      - system_design
+      - api_contract_definition
+      - data_modeling
+      - mermaid_diagramming
+      - tech_stack_selection
+    access:
+      - read_docs
+      - write_arch
+    output_paths:
+      - docs/arch/
+    cursor_rule: "02-architecture.mdc"
+    kiro_skill: "architect-system.md"
 
   design-agent:
+    description: "Converts user stories into UI wireframes, prototypes, and component scaffolding."
     model: "claude-3-opus"
     capabilities:
-      - "figma_api_write"
-      - "css_generation"
+      - figma_api_write
+      - webflow_integration
+      - css_generation
+      - component_scaffolding
+      - accessibility_review
     access:
-      - "write_ui_src"
+      - read_docs
+      - write_ui_src
+    output_paths:
+      - docs/design/
+      - src/ui/
+    integrations:
+      - figma
+      - webflow
+    cursor_rule: "02-design-agent.mdc"
+    kiro_skill: "generate_prototype.py"
+    kiro_steering: "design-agent.md"
 
   development-agent:
+    description: "Implements features, handles complex multi-file refactoring, writes production code."
     model: "claude-3.5-sonnet"
     capabilities:
-      - "polyglot_coding"
-      - "ast_refactoring"
+      - polyglot_coding
+      - ast_refactoring
+      - api_implementation
+      - database_integration
+      - performance_optimization
     access:
-      - "write_src"
+      - read_all
+      - write_src
+    output_paths:
+      - src/
+    standards:
+      - strict_typing
+      - solid_principles
+      - atomic_commits
+    cursor_rule: "03-development-agent.mdc"
+    kiro_steering: "development-agent.md"
 
   testing-agent:
+    description: "Generates comprehensive test suites, identifies bugs, and autonomously applies fixes."
     model: "gpt-4"
     capabilities:
-      - "mock_generation"
-      - "stack_trace_analysis"
+      - unit_test_generation
+      - integration_test_generation
+      - e2e_test_generation
+      - mock_generation
+      - stack_trace_analysis
+      - bug_patching
     access:
-      - "write_tests"
-      - "write_src" # Allowed to fix bugs
+      - read_src
+      - write_tests
+      - write_src  # limited to bug fixes only
+    output_paths:
+      - tests/
+      - docs/reports/coverage-report.md
+    metrics:
+      min_coverage: 90
+      security_path_coverage: 100
+    cursor_rule: "04-testing-agent.mdc"
+    kiro_skill: "synthesize_tests.py"
+    kiro_steering: "testing-standards.md"
 
   security-agent:
+    description: "Performs SAST, dependency CVE scanning, secret detection, and IaC misconfiguration checks."
     model: "claude-3.5-sonnet"
     capabilities:
-      - "sast_scanning"
-      - "secret_detection"
+      - sast_scanning
+      - secret_detection
+      - cve_dependency_audit
+      - iac_misconfiguration_check
+      - owasp_top10_review
+      - auto_remediation
     access:
-      - "read_all"
-      - "block_ci"
+      - read_all
+      - write_src  # limited to security patches
+      - block_ci
+    output_paths:
+      - docs/reports/security-report.md
+    block_on_critical: true
+    cursor_rule: "05-security-agent.mdc"
+    kiro_skill: "static_scanner.py"
+    kiro_steering: "security-baseline.md"
 
   deployment-agent:
+    description: "Manages CI/CD pipelines, predicts deployment risk, executes canary rollouts, handles incident response."
     model: "gpt-4"
     capabilities:
-      - "infrastructure_as_code"
-      - "telemetry_parsing"
+      - infrastructure_as_code
+      - telemetry_parsing
+      - risk_prediction
+      - canary_deployment
+      - rollback_automation
+      - incident_response
     access:
-      - "write_infra"
-      - "execute_deploy"
+      - read_all
+      - write_infra
+      - execute_deploy
+      - trigger_rollback
+    output_paths:
+      - infra/
+      - docs/reports/deployment-runbook.md
+    cursor_rule: "06-deployment-agent.mdc"
+    kiro_skill: "deployment_predictor.py"
+    kiro_steering: "deployment-agent.md"
+
+communication_protocol:
+  handoff_format:
+    fields:
+      - STATUS: "[COMPLETE|FAIL|BLOCKED]"
+      - PHASE: "<phase-id>"
+      - ARTIFACTS: "<list of files written>"
+      - NEXT_AGENT: "<agent-id>"
+      - NOTES: "<blockers or context>"
+  escalation:
+    max_remediation_cycles: 3
+    escalate_to: human_review

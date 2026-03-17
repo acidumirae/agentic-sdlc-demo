@@ -1,0 +1,64 @@
+version: "1.0"
+description: >
+  Known vulnerability patterns and their required remediations.
+  Security Agent appends new patterns here after each review cycle.
+
+patterns:
+  - id: SEC-001
+    category: injection
+    owasp: A03
+    name: SQL Injection
+    pattern: "raw string interpolation in SQL queries"
+    detection: "f\"|%s|format\\(|\\+.*WHERE|\\+.*SELECT"
+    remediation: "Use parameterized queries or ORM query builders"
+    severity: critical
+    example_fix: |
+      # BAD
+      cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
+      # GOOD
+      cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+
+  - id: SEC-002
+    category: xss
+    owasp: A03
+    name: Cross-Site Scripting
+    pattern: "unescaped user input rendered in HTML"
+    detection: "innerHTML|dangerouslySetInnerHTML|document\\.write"
+    remediation: "Escape all user-supplied content; use textContent over innerHTML"
+    severity: critical
+
+  - id: SEC-003
+    category: secrets
+    owasp: A02
+    name: Hardcoded Secrets
+    pattern: "API keys, passwords, tokens in source code"
+    detection: "(api_key|password|secret|token)\\s*=\\s*['\"][^'\"]{8,}"
+    remediation: "Move to environment variables or secrets manager"
+    severity: critical
+
+  - id: SEC-004
+    category: auth
+    owasp: A07
+    name: Missing Authentication
+    pattern: "endpoints without auth middleware"
+    detection: "router\\.(get|post|put|delete)(?!.*auth|.*middleware)"
+    remediation: "Apply authentication middleware to all protected routes"
+    severity: high
+
+  - id: SEC-005
+    category: dependency
+    owasp: A06
+    name: Vulnerable Dependency
+    pattern: "known CVE in package"
+    detection: "automated CVE database lookup"
+    remediation: "Upgrade to patched version or apply vendor workaround"
+    severity: variable
+
+  - id: SEC-006
+    category: iac
+    owasp: A05
+    name: Overly Permissive IAM
+    pattern: "wildcard actions or resources in IAM policies"
+    detection: "\"Action\": \"\\*\"|\"Resource\": \"\\*\""
+    remediation: "Scope IAM policies to minimum required actions and resources"
+    severity: high

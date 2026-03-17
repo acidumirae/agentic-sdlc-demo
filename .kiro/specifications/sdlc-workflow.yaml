@@ -1,56 +1,173 @@
 name: Agentic SDLC Full Cycle
-version: "1.0"
+version: "2.0"
 description: >
-  Defines the chronological orchestration of specialized AI agents 
-  from Requirements Gathering through to Operations & Deployment.
+  Chronological orchestration of specialized AI agents from Requirements
+  through Deployment. Each phase is gated by artifact validation.
+  Orchestration agent coordinates all handoffs and enforces phase gates.
 
 trigger:
-  type: git_push
-  branches: [ "main", "feature/*" ]
+  - type: git_push
+    branches: ["main", "feature/*", "release/*"]
+  - type: manual
+    via: "orchestration-agent"
+
+state_machine:
+  initial: idle
+  transitions:
+    - from: idle
+      to: planning
+      condition: "business_goal_provided"
+    - from: planning
+      to: design
+      condition: "artifact_exists:docs/planning/planning.md"
+      require_approval: true
+    - from: design
+      to: development
+      condition: "artifact_exists:docs/arch/architecture.md"
+      require_approval: true
+    - from: development
+      to: testing
+      condition: "src_compiles_clean"
+    - from: development
+      to: security
+      condition: "src_compiles_clean"
+    - from: testing
+      to: deployment
+      condition: "coverage_gte:90 AND security_status:cleared"
+    - from: security
+      to: deployment
+      condition: "no_critical_vulnerabilities AND testing_status:passed"
+    - from: testing
+      to: remediation
+      condition: "coverage_lt:90 OR tests_failing"
+    - from: security
+      to: remediation
+      condition: "critical_vulnerability_found"
+    - from: remediation
+      to: development
+      condition: "remediation_cycle_lt:3"
+    - from: remediation
+      to: human_review
+      condition: "remediation_cycle_gte:3"
 
 phases:
   - id: requirements-and-planning
-    agent_pool: [ "planning-agent" ]
-    action: "extract_requirements"
-    skill_dependency: "extract_requirements.py"
-    output:
-      - "docs/planning/planning.md"
+    state: planning
+    agent_pool: [planning-agent]
+    skill: extract_requirements.py
+    inputs:
+      - type: user_prompt
+        description: "High-level business goal or feature request"
+    outputs:
+      - path: docs/planning/planning.md
+        required: true
+      - path: docs/planning/user-stories.md
+        required: true
+      - path: docs/planning/acceptance-criteria.md
+        required: true
     require_approval: true
+    on_fail: block_pipeline
 
   - id: design-and-prototyping
-    depends_on: [ requirements-and-planning ]
-    agent_pool: [ "design-agent" ]
-    action: "generate_mockups"
-    skill_dependency: "generate_prototype.py"
-    output:
-      - "src/ui/components/"
+    state: design
+    depends_on: [requirements-and-planning]
+    agent_pool: [design-agent, architect-agent]
+    skill: generate_prototype.py
+    inputs:
+      - path: docs/planning/planning.md
+      - path: docs/planning/user-stories.md
+    outputs:
+      - path: docs/arch/architecture.md
+        required: true
+      - path: docs/design/wireframes/
+        required: false
+      - path: src/ui/components/
+        required: false
+    integrations:
+      - name: figma
+        type: design_tool
+        action: create_wireframe
+      - name: webflow
+        type: prototyping_tool
+        action: generate_prototype
     require_approval: true
+    on_fail: block_pipeline
 
   - id: development-and-refactoring
-    depends_on: [ design-and-prototyping ]
-    agent_pool: [ "development-agent" ]
-    action: "implement_features"
+    state: development
+    depends_on: [design-and-prototyping]
+    agent_pool: [development-agent]
+    inputs:
+      - path: docs/arch/architecture.md
+      - path: docs/planning/acceptance-criteria.md
+    outputs:
+      - path: src/
+        required: true
+    standards:
+      - strict_typing
+      - solid_principles
+      - atomic_commits
+      - no_hardcoded_secrets
     require_approval: false
+    on_fail: remediation
 
   - id: testing-and-debugging
-    depends_on: [ development-and-refactoring ]
-    agent_pool: [ "testing-agent" ]
-    action: "run_test_synthesis_and_fix"
-    skill_dependency: "synthesize_tests.py"
+    state: testing
+    depends_on: [development-and-refactoring]
+    agent_pool: [testing-agent]
+    skill: synthesize_tests.py
+    inputs:
+      - path: src/
+      - path: docs/planning/user-stories.md
+    outputs:
+      - path: tests/
+        required: true
+      - path: docs/reports/coverage-report.md
+        required: true
     metrics:
-      target_coverage: "95%"
+      target_coverage: "90%"
+      security_path_coverage: "100%"
     require_approval: false
+    on_fail: remediation
 
   - id: security-review
-    depends_on: [ development-and-refactoring ]
-    agent_pool: [ "security-agent" ]
-    action: "static_analysis_and_cve_check"
+    state: security
+    depends_on: [development-and-refactoring]
+    agent_pool: [security-agent]
+    skill: static_scanner.py
+    inputs:
+      - path: src/
+      - path: tests/
+      - path: .github/workflows/
+      - path: infra/
+    outputs:
+      - path: docs/reports/security-report.md
+        required: true
+    checks:
+      - owasp_top_10
+      - cve_dependency_scan
+      - secret_detection
+      - iac_misconfiguration
     block_on_critical: true
+    on_fail: remediation
 
   - id: deployment-and-operations
-    depends_on: [ testing-and-debugging, security-review ]
-    agent_pool: [ "deployment-agent" ]
-    action: "predictive_deploy"
-    skill_dependency: "deployment_predictor.py"
-    strategy: "canary"
+    state: deployment
+    depends_on: [testing-and-debugging, security-review]
+    agent_pool: [deployment-agent]
+    skill: deployment_predictor.py
+    inputs:
+      - path: docs/reports/coverage-report.md
+      - path: docs/reports/security-report.md
+      - path: infra/
+    outputs:
+      - path: docs/reports/deployment-runbook.md
+        required: true
+    strategy:
+      type: canary
+      initial_traffic_percent: 10
+      increment: 20
+      interval_minutes: 5
+      rollback_on: "error_rate_gt:1% OR latency_p99_gt:500ms"
     require_approval: true
+    on_fail: rollback
