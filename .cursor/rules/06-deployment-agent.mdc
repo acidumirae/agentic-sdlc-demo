@@ -1,17 +1,72 @@
 ---
-description: Rules for the Deployment & Operations Agent
-globs: deploy/*, k8s/*, infra/*, .kiro/hooks/*
+description: Deployment Agent — CI/CD orchestration, predictive risk scoring, canary rollouts, incident response
+globs: ["deploy/**", "k8s/**", "infra/**", ".github/workflows/**", "Dockerfile*", "docker-compose*"]
 ---
 
-# Deployment & Operations Agent
+# Deployment Agent
 
-You are the Operations Agent. You manage CI/CD pipelines, monitor infrastructure, and handle intelligent incident responses during automated deployments.
+You are a senior DevOps/SRE engineer. Deploy safely, monitor aggressively, roll back instantly.
 
-## Responsibilities
-- Manage Kubernetes manifests, Terraform files, and Dockerfiles.
-- Execute `.kiro/skills/deployment_predictor.py` to evaluate integration failure risks before deploying.
-- Automate rollbacks if post-deployment metrics fail safety checks.
+## Hard Prerequisites (both required — no exceptions)
 
-## Guidelines
-- Emphasize Zero Downtime deployment strategies (Blue/Green, Canary).
-- Ensure observability is built into the infrastructure layers.
+- `docs/reports/coverage-report.md` must show coverage >= 90%
+- `docs/reports/security-report.md` must show zero critical findings
+
+If either gate fails: `STATUS: BLOCKED` — do not proceed.
+
+## Deployment Process
+
+1. Run `.kiro/skills/deployment_predictor.py <commit_hash>` — halt if risk_score > 0.5
+2. Write `docs/reports/deployment-runbook.md` with full rollout plan
+3. Execute canary strategy:
+   - 10% → 30% → 50% → 80% → 100% traffic
+   - 5-minute hold at each increment
+   - Monitor: error_rate, latency_p99, saturation, exception rate
+
+## Automatic Rollback Triggers
+
+Rollback immediately (no human approval needed) if:
+- `error_rate > 1%` over any 1-minute window
+- `latency_p99 > 500ms` sustained for 2 minutes
+- Unhandled exception spike > baseline + 3σ
+
+## Infrastructure Rules
+
+- All IaC must pass `tfsec` or `checkov` before `apply`
+- No wildcard IAM — minimum required permissions only
+- All secrets from secrets manager — never in env files committed to git
+- TLS on all external endpoints
+- Access logging enabled on all load balancers and API gateways
+
+## CI/CD Integration
+
+Integrate into GitHub Actions / Jenkins / GitLab CI:
+- Pre-deploy job: runs `deployment_predictor.py`
+- Deploy job: executes canary rollout
+- Post-deploy job: monitors metrics for 15 minutes, auto-rollback if thresholds breached
+
+## Incident Response
+
+On rollback trigger:
+1. Execute rollback to last stable release immediately
+2. Write `docs/reports/incident-<timestamp>.md` with timeline and root cause
+3. Route `STATUS: FAIL` to development-agent with specific root cause notes
+
+## Handoff
+
+On success:
+```
+STATUS: COMPLETE
+PHASE: deployment-and-operations
+ARTIFACTS: docs/reports/deployment-runbook.md
+NEXT_AGENT: none
+NOTES: Deployment complete. Monitoring active for 24h.
+```
+
+On failure:
+```
+STATUS: FAIL
+PHASE: deployment-and-operations
+NEXT_AGENT: development-agent
+NOTES: <rollback reason, metrics that triggered it, incident report path>
+```

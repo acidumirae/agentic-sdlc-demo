@@ -1,20 +1,47 @@
-#!/bin/bash
-# Hook: pre-implementation.sh
-# Purpose: Ensures that a developer agent cannot start writing code without a valid spec and architecture.
+#!/usr/bin/env bash
+# Hook: pre-implementation
+# Agent: orchestration-agent
+# Phase gate: blocks development unless planning and architecture artifacts exist.
+# Run manually or wire into your IDE's pre-task hook.
 
-echo "[Kiro Hook] Verifying SDLC phase prerequisites..."
+set -euo pipefail
 
-if [ ! -d "docs/specs" ] || [ -z "$(ls -A docs/specs/*.md 2>/dev/null)" ]; then
-    echo "❌ SDLC Violation: No specifications found in docs/specs/."
-    echo "Action required: Run the Product Manager agent to generate specs."
-    exit 1
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo " Kiro SDLC — Pre-Implementation Phase Gate"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+ERRORS=0
+
+# Check planning artifacts
+for artifact in "docs/planning/planning.md" "docs/planning/user-stories.md" "docs/planning/acceptance-criteria.md"; do
+  if [ ! -f "$artifact" ]; then
+    echo "❌ Missing: $artifact"
+    ERRORS=$((ERRORS + 1))
+  else
+    echo "✅ Found:   $artifact"
+  fi
+done
+
+# Check architecture artifact
+if [ ! -f "docs/arch/architecture.md" ]; then
+  echo "❌ Missing: docs/arch/architecture.md"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "✅ Found:   docs/arch/architecture.md"
 fi
 
-if [ ! -d "docs/arch" ] || [ -z "$(ls -A docs/arch/*.md 2>/dev/null)" ]; then
-    echo "❌ SDLC Violation: No architecture documents found in docs/arch/."
-    echo "Action required: Run the Architect agent to design the system."
-    exit 1
+echo ""
+
+if [ $ERRORS -gt 0 ]; then
+  echo "❌ SDLC VIOLATION — $ERRORS required artifact(s) missing."
+  echo ""
+  echo "Required actions:"
+  echo "  1. Run planning-agent  → generates docs/planning/"
+  echo "  2. Run architect-agent → generates docs/arch/architecture.md"
+  echo ""
+  echo "See .kiro/specifications/sdlc-workflow.yaml for phase dependencies."
+  exit 1
 fi
 
-echo "✅ Prerequisites met. Proceeding to implementation..."
+echo "✅ All phase prerequisites met. Development Agent may proceed."
 exit 0

@@ -1,11 +1,43 @@
-# Global Agentic SDLC Rules
+# Agentic SDLC — Global Rules v2.0
 
-You are participating in an autonomous/semi-autonomous Agentic SDLC. Your behavior must change dynamically based on the current active phase of the lifecycle. 
+You are participating in a fully autonomous multi-agent SDLC. Your active persona and behavior
+are determined by the current workflow phase defined in `.kiro/specifications/sdlc-workflow.yaml`.
 
 ## Core Directives
-1. **Never Skip Phases**: Do not write implementation code if the architecture and specification phases are not complete and written to disk.
-2. **Document Everything**: All decisions, including why certain patterns were chosen, must be documented.
-3. **Artifact-Driven**: Use artifacts to communicate progress between different agent personas (e.g., PM -> Architect -> Dev -> QA).
-4. **Self-Correction**: If tests fail or code review raises flags, immediately return to the implementation phase. Do not attempt to forcefully deploy.
 
-Maintain a strict separation of concerns depending on which persona you are currently adopting.
+1. NEVER skip phases — no implementation code without architecture; no deployment without test + security sign-off
+2. ALWAYS write output artifacts to disk at the documented paths before declaring a phase complete
+3. ALWAYS structure handoffs with STATUS / PHASE / ARTIFACTS / NEXT_AGENT / NOTES
+4. ALWAYS provide fixes alongside vulnerability reports — warnings alone are insufficient
+5. NEVER hardcode secrets — environment variables or secrets manager only
+6. SELF-CORRECT — if tests fail or security blocks a commit, return to development immediately
+
+## Active Agent Selection
+
+Read the current phase from `.kiro/specifications/sdlc-workflow.yaml` and adopt the matching persona:
+
+| Phase | Persona | Rule File |
+|---|---|---|
+| requirements-and-planning | Product Manager | `.cursor/rules/01-planning-agent.mdc` |
+| design-and-prototyping | UI/UX Engineer + Architect | `.cursor/rules/02-design-agent.mdc`, `02-architecture.mdc` |
+| development-and-refactoring | Senior Engineer | `.cursor/rules/03-development-agent.mdc` |
+| testing-and-debugging | QA Engineer | `.cursor/rules/04-testing-agent.mdc` |
+| security-review | AppSec Engineer | `.cursor/rules/05-security-agent.mdc` |
+| deployment-and-operations | SRE / DevOps | `.cursor/rules/06-deployment-agent.mdc` |
+| any / orchestrating | Orchestrator | `.cursor/rules/00-orchestration.mdc` |
+
+## Phase Gate Summary
+
+| Phase | Required Input | Required Output |
+|---|---|---|
+| Planning | business goal | docs/planning/ (3 files) |
+| Design | docs/planning/planning.md | docs/arch/architecture.md, docs/design/ |
+| Development | docs/arch/architecture.md | src/ |
+| Testing | src/ | tests/, docs/reports/coverage-report.md |
+| Security | src/, tests/ | docs/reports/security-report.md |
+| Deployment | coverage >= 90%, zero critical vulns | docs/reports/deployment-runbook.md |
+
+## Remediation Loop
+
+FAIL → REMEDIATION → fix → re-run phase → COMPLETE
+After 3 consecutive FAILs on the same phase → escalate to human, halt pipeline.

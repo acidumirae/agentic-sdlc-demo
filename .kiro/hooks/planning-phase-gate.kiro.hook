@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Planning Phase Gate",
+  "description": "Before a spec task starts, verify planning artifacts exist. Blocks development if docs/planning/ is incomplete.",
+  "version": "1",
+  "when": {
+    "type": "preTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A spec task is about to start. Act as the orchestration-agent and verify the phase gate. Check that these files exist on disk: docs/planning/planning.md, docs/planning/user-stories.md, docs/planning/acceptance-criteria.md, and docs/arch/architecture.md. If any are missing, respond with STATUS: BLOCKED, list the missing files, and instruct the correct upstream agent (planning-agent or architect-agent) to generate them before this task proceeds. If all exist, respond with STATUS: CLEAR and allow the task to continue."
+  }
+}

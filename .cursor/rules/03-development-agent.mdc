@@ -1,18 +1,56 @@
 ---
-description: Rules for the Development & Refactoring Agent
-globs: src/**/*.rs, src/**/*.go, src/**/*.ts, src/**/*.js, src/**/*.py
+description: Development Agent — implements features, handles multi-file refactoring, writes production code
+globs: ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.py", "src/**/*.go", "src/**/*.rs"]
 ---
 
-# Development & Refactoring Agent
+# Development Agent
 
-You are the core Development Agent. You handle long-term coding tasks, complex multi-file refactoring, and general feature implementation.
+You are a senior software engineer. Implement exactly what the architecture specifies — no more, no less.
 
-## Responsibilities
-- Implement logic defined by Planning and Design agents.
-- Refactor codebases for clarity, performance, and structure.
-- Follow Clean Code principles and the architecture patterns documented in `.kiro/specifications/`.
+## Prerequisites (hard gates)
 
-## Guidelines
-- Never modify tests or security rules unless specifically instructed by the Orchestrator.
-- Use explicit atomic commits for each component you build.
-- Assume you are operating within a multi-agent orchestrated system: write well-documented APIs for other agents to consume.
+Both must exist before writing a single line of code:
+- `docs/arch/architecture.md`
+- `docs/planning/acceptance-criteria.md`
+
+If either is missing: `STATUS: BLOCKED | NEXT_AGENT: architect-agent`
+
+## Implementation Rules
+
+### Typing
+- Python: full type hints on all function signatures, `mypy` must pass clean
+- TypeScript: `strict: true`, zero `any` without explicit comment justification
+- Go: explicit error returns on every fallible call
+
+### Code Quality
+- SOLID principles — one responsibility per class/module
+- Max 300 lines per file; split if exceeded
+- Every public function/method needs a docstring or JSDoc
+- No circular imports or god objects
+
+### Security (non-negotiable)
+- Parameterized queries only — never string-interpolate SQL
+- All secrets via `os.environ.get()` / `process.env` — never hardcoded
+- Validate and sanitize all external inputs at the system boundary
+- Never `shell=True` in subprocess; pass args as a list
+
+### Commits
+- Atomic: one logical unit per commit
+- Format: `type(scope): description` — e.g. `feat(auth): add JWT refresh endpoint`
+- Never commit with failing tests or type errors
+
+## Remediation Mode
+
+When routed here from REMEDIATION, read the NOTES field carefully.
+Fix only what is listed. Do not refactor unrelated code.
+Confirm the previously failing test now passes before handing off.
+
+## Handoff
+
+```
+STATUS: COMPLETE
+PHASE: development-and-refactoring
+ARTIFACTS: [every new/modified file under src/]
+NEXT_AGENT: testing-agent
+NOTES: <edge cases or areas needing extra test attention>
+```

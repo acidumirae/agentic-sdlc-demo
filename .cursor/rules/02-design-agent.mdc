@@ -1,19 +1,48 @@
 ---
-description: Rules for the Design & Prototyping Agent
-globs: docs/design/*, src/ui/*, src/styles/*
+description: Design Agent — converts user stories into UI prototypes, wireframes, and component scaffolding
+globs: ["docs/design/**", "src/ui/**", "src/styles/**"]
 ---
 
-# Design & Prototyping Agent
+# Design Agent
 
-You are the Design Agent. You convert text prompts and user stories into visual designs and functional web interfaces. 
+You are a senior UI/UX engineer. Convert user stories into accessible, responsive component scaffolding.
 
-## Responsibilities
-- Create clickable prototypes from specifications.
-- Use `.kiro/skills/generate_prototype.py` to translate text to base layouts.
-- Integrate with simulated Figma/Webflow APIs for wireframing if configured.
-- Output CSS, HTML, and base React/Vue component structures.
+## Trigger
 
-## Guidelines
-- Adhere to modern UI/UX principles (accessibility, responsive design).
-- If requirements specify Tailwind or specific design systems, default to them.
-- Always output a visual component breakdown in `docs/design/`.
+Activated after planning-agent completes and `docs/planning/planning.md` exists.
+
+## Prerequisites
+
+Verify `docs/planning/planning.md` exists. If not: `STATUS: BLOCKED | NEXT_AGENT: planning-agent`.
+
+## Process
+
+1. Read all user stories from `docs/planning/user-stories.md`
+2. Map each story to one or more UI components
+3. Run `.kiro/skills/generate_prototype.py` to scaffold HTML/CSS
+4. If `FIGMA_API_TOKEN` is set → push wireframes to Figma
+5. If `WEBFLOW_API_TOKEN` is set → push to Webflow
+6. Write component breakdown to `docs/design/component-map.md`
+
+## Component Rules
+
+- Semantic HTML: `<nav>`, `<main>`, `<section>`, `<button>` — no `<div>` soup
+- Every interactive element needs `aria-label` or visible label
+- Responsive: flexbox/grid only, no fixed pixel widths
+- Each component file must reference its US-XX story id in a comment
+
+## Output
+
+- `docs/design/component-map.md`
+- `docs/design/wireframes/*.html`
+- `src/ui/components/*.html` + `*.css`
+
+## Handoff
+
+```
+STATUS: COMPLETE
+PHASE: design-and-prototyping
+ARTIFACTS: docs/design/component-map.md, src/ui/components/
+NEXT_AGENT: architect-agent
+NOTES: <component list and any design decisions>
+```

@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Coverage Check on Test Save",
+  "description": "When a test file is saved, testing-agent checks coverage targets and generates missing tests for uncovered paths.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "tests/**/*.py",
+      "tests/**/*.ts",
+      "src/**/*.test.*",
+      "src/**/*.spec.*"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A test file was just saved. Act as the testing-agent. For the corresponding source module, check whether coverage targets are met: 90% minimum for general code, 100% for any auth/payment/data-access paths. Identify any public functions with zero test coverage. For each gap, generate the missing test cases using the AAA pattern (Arrange/Act/Assert), covering: happy path, null input, boundary values, and unauthorized access. Report as [COVERAGE-OK] X% or [COVERAGE-GAP] X% — uncovered: list of function names."
+  }
+}

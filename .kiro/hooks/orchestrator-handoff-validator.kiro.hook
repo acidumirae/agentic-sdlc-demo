@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Orchestrator Handoff Validator",
+  "description": "After a spec task completes, orchestration-agent validates the handoff and routes to the next phase agent.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A spec task just completed. Act as the orchestration-agent. Review the last agent output for a handoff block with STATUS, PHASE, ARTIFACTS, NEXT_AGENT, and NOTES. Validate: (1) All listed ARTIFACTS exist on disk. (2) If STATUS is COMPLETE, confirm next phase prerequisites are met and activate NEXT_AGENT. (3) If STATUS is FAIL or BLOCKED, route to REMEDIATION, increment the cycle counter, and notify the appropriate agent. (4) If this is the 3rd consecutive FAIL on the same phase, escalate to human review and halt the pipeline. State your routing decision clearly."
+  }
+}

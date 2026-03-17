@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Security Scan on Save",
+  "description": "On every source file save, security-agent scans for critical vulnerabilities inline and blocks if found.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/**/*.py",
+      "src/**/*.ts",
+      "src/**/*.js",
+      "src/**/*.tsx",
+      "src/**/*.jsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A source file was just saved. Act as the security-agent and scan the changed file for: (1) hardcoded secrets matching pattern (api_key|password|secret|token) = \"...\", (2) SQL injection via f-string or string concatenation in queries, (3) innerHTML / dangerouslySetInnerHTML / document.write usage, (4) subprocess calls with shell=True, (5) any wildcard IAM policy entries. For each finding output [SECURITY-BLOCK] with the line number and the exact remediation code. If the file is clean, output a single line: [SECURITY-OK] filename."
+  }
+}

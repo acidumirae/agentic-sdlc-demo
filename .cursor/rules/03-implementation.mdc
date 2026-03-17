@@ -1,14 +1,30 @@
 ---
-description: Rules for the Implementation Phase
-globs: src/**/*.ts, src/**/*.py, src/**/*.go, src/**/*.js
+description: Implementation phase rules — enforced on all source file edits
+globs: ["src/**/*.ts", "src/**/*.tsx", "src/**/*.py", "src/**/*.go", "src/**/*.js"]
 ---
-# Implementation Phase Rules [Persona: Developer Agent]
 
-When writing actual code:
-1. **Adhere to the Plan**: You must strictly follow the `architecture.md` and API contracts. Do not invent new features.
-2. **TDD / Test Alongside**: Write unit tests alongside the functional code.
-3. **Code Quality**:
-   - Use strict typing where applicable.
-   - Follow SOLID principles.
-   - Document complex logic with inline comments.
-4. **Completion criteria**: A feature is not complete until it compiles/transpiles without errors and basic `happy path` tests pass.
+# Implementation Phase Rules
+
+These rules are enforced on every source file edit, regardless of which agent is active.
+
+## Phase Gate
+
+If `docs/arch/architecture.md` does not exist, stop immediately.
+Do not write implementation code. Instruct the architect-agent to produce it first.
+
+## Code Standards
+
+1. Follow the API contracts defined in `docs/arch/architecture.md` exactly
+2. Write unit tests alongside functional code (TDD preferred)
+3. Use strict typing — no implicit `any`, no untyped Python functions
+4. Follow SOLID: single responsibility, open/closed, dependency inversion
+5. Document complex logic with inline comments explaining *why*, not *what*
+
+## Definition of Done
+
+A feature is NOT complete until:
+- [ ] Compiles/transpiles without errors or warnings
+- [ ] Happy-path tests pass
+- [ ] Type checker passes clean
+- [ ] No hardcoded secrets
+- [ ] Docstrings/JSDoc on all public APIs
