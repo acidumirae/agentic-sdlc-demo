@@ -1,48 +1,56 @@
-name: Comprehensive Agentic SDLC
-version: 1.0.0
-description: A formalized state machine for autonomous software development.
+name: Agentic SDLC Full Cycle
+version: "1.0"
+description: >
+  Defines the chronological orchestration of specialized AI agents 
+  from Requirements Gathering through to Operations & Deployment.
 
-modes:
-  - strict: true # Prevent agents from bypassing process
-  - require_human_approval_on_deploy: true
+trigger:
+  type: git_push
+  branches: [ "main", "feature/*" ]
 
 phases:
-  - id: product_planning
-    name: Planning & Requirements
-    agent_role: Product Manager
-    entry_condition: "New feature request or issue created"
-    required_outputs:
-      - filepath: docs/specs/*_spec.md
-    transitions_to: architecture_design
+  - id: requirements-and-planning
+    agent_pool: [ "planning-agent" ]
+    action: "extract_requirements"
+    skill_dependency: "extract_requirements.py"
+    output:
+      - "docs/planning/planning.md"
+    require_approval: true
 
-  - id: architecture_design
-    name: Architecture
-    agent_role: Architect
-    entry_condition: "Spec approved"
-    required_outputs:
-      - filepath: docs/arch/*_architecture.md
-      - filepath: docs/arch/*.mermaid
-    transitions_to: implementation
+  - id: design-and-prototyping
+    depends_on: [ requirements-and-planning ]
+    agent_pool: [ "design-agent" ]
+    action: "generate_mockups"
+    skill_dependency: "generate_prototype.py"
+    output:
+      - "src/ui/components/"
+    require_approval: true
 
-  - id: implementation
-    name: Implementation
-    agent_role: Developer
-    entry_condition: "Architecture approved"
-    required_outputs:
-      - filepath: src/**
-      - filepath: tests/**
-    transitions_to: qa_verification
+  - id: development-and-refactoring
+    depends_on: [ design-and-prototyping ]
+    agent_pool: [ "development-agent" ]
+    action: "implement_features"
+    require_approval: false
 
-  - id: qa_verification
-    name: Verification & Testing
-    agent_role: QA Engineer
-    entry_condition: "Code compiled and basic tests exist"
-    required_outputs:
-      - filepath: docs/reports/test_run.json
-    transitions_to: code_review
+  - id: testing-and-debugging
+    depends_on: [ development-and-refactoring ]
+    agent_pool: [ "testing-agent" ]
+    action: "run_test_synthesis_and_fix"
+    skill_dependency: "synthesize_tests.py"
+    metrics:
+      target_coverage: "95%"
+    require_approval: false
 
-  - id: code_review
-    name: Review & Handoff
-    agent_role: Security & Review Engineer
-    entry_condition: "All tests passing"
-    transitions_to: complete
+  - id: security-review
+    depends_on: [ development-and-refactoring ]
+    agent_pool: [ "security-agent" ]
+    action: "static_analysis_and_cve_check"
+    block_on_critical: true
+
+  - id: deployment-and-operations
+    depends_on: [ testing-and-debugging, security-review ]
+    agent_pool: [ "deployment-agent" ]
+    action: "predictive_deploy"
+    skill_dependency: "deployment_predictor.py"
+    strategy: "canary"
+    require_approval: true
